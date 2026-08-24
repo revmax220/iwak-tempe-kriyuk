@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iwak Tempe Keriyukk 🛒</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Konfigurasi Warna -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35',
+                        secondary: '#FFC107',
+                        dark: '#2D2A32',
+                        light: '#FFF8EA',
+                        accent: '#4CAF50'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-shadow { box-shadow: 0 10px 30px rgba(255, 107, 53, 0.15); }
+            .btn-hover { transition: all 0.3s ease; }
+            .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3); }
+            .scroll-smooth { scroll-behavior: smooth; }
+        }
+    </style>
+</head>
+<body class="bg-light font-sans text-dark scroll-smooth">
+    <!-- Navbar -->
+    <nav class="bg-white/90 backdrop-blur-md fixed w-full top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="font-display font-bold text-2xl text-primary">
+                🐟 Iwak Tempe <span class="text-secondary">Keriyukk</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <button id="cartBtn" class="relative text-dark hover:text-primary transition-colors">
+                    <i class="fa fa-shopping-cart text-xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-28 pb-16 px-4 bg-gradient-to-br from-primary/10 to-secondary/10">
+        <div class="container mx-auto text-center">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-display font-bold text-dark mb-4">
+                Nikmati <span class="text-primary">Iwak Tempe</span> <br>
+                <span class="text-secondary">Khas Nusantara</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+                Tempe goreng renyah, ikan lezat, bumbu meresap — siap santap kapan saja!
+            </p>
+            <a href="#produk" class="inline-block bg-primary text-white font-semibold px-8 py-3 rounded-full btn-hover">
+                Pesan Sekarang <i class="fa fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Produk Section -->
+    <section id="produk" class="py-16 px-4">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-display font-bold text-center mb-12">🍽️ Menu Kami</h2>
+            <div id="productList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Produk akan dimuat lewat JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Keranjang Section -->
+    <section id="cartSection" class="py-16 px-4 bg-white rounded-t-3xl shadow-inner">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-display font-bold text-center mb-8">🛒 Keranjang Pesanan</h2>
+            <div id="cartContent" class="max-w-3xl mx-auto bg-light p-6 rounded-2xl card-shadow">
+                <div id="emptyCart" class="text-center py-8 text-gray-500">
+                    <i class="fa fa-shopping-cart text-4xl mb-3"></i>
+                    <p>Keranjang masih kosong, yuk pilih menu favoritmu!</p>
+                </div>
+                <div id="cartItems" class="space-y-4 hidden"></div>
+                <div id="cartTotal" class="mt-6 pt-4 border-t border-gray-200 hidden">
+                    <div class="flex justify-between text-xl font-bold">
+                        <span>Total:</span>
+                        <span id="totalPrice" class="text-primary">Rp 0</span>
+                    </div>
+                    <button id="checkoutBtn" class="w-full mt-4 bg-accent text-white font-semibold py-3 rounded-xl btn-hover">
+                        <i class="fa fa-credit-card mr-2"></i> Checkout Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-12 px-4">
+        <div class="container mx-auto text-center">
+            <h3 class="text-2xl font-display font-bold mb-4">🐟 Iwak Tempe Keriyukk</h3>
+            <p class="text-gray-400 mb-6">Makanan lezat, harga bersahabat, siap antar ke rumahmu!</p>
+            <p class="text-sm text-gray-500">© 2026 Iwak Tempe Keriyukk • Semua Hak Dilindungi</p>
+        </div>
+    </footer>
+
+    <!-- Modal Notifikasi -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-accent text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        Berhasil ditambahkan ke keranjang! 🎉
+    </div>
+
+    <script>
+        // Data Produk
+        const products = [
+            { id: 1, name: "Tempe Goreng Original", price: 2000, img: "https://picsum.photos/id/139/300/200", desc: "Renyah & gurih" },
+            { id: 2, name: "Tempe Mendoan", price: 2500, img: "https://picsum.photos/id/192/300/200", desc: "Lembut & bumbu meresap" },
+            { id: 3, name: "Ikan Lele Goreng", price: 5000, img: "https://picsum.photos/id/292/300/200", desc: "Ikan segar, garing" },
+            { id: 4, name: "Ikan Nila Goreng", price: 8000, img: "https://picsum.photos/id/306/300/200", desc: "Daging tebal & manis" },
+            { id: 5, name: "Pecel Tempe Iwak", price: 10000, img: "https://picsum.photos/id/292/300/200", desc: "Lengkap dengan sambal" },
+            { id: 6, name: "Tempe Penyet", price: 7000, img: "https://picsum.photos/id/139/300/200", desc: "Pedas bikin nagih" },
+            { id: 7, name: "Ikan Mas Goreng", price: 9000, img: "https://picsum.photos/id/493/300/200", desc: "Ikan mas segar" },
+            { id: 8, name: "Paket Hemat 2", price: 12000, img: "https://picsum.photos/id/163/300/200", desc: "Tempe + Ikan + Nasi" }
+        ];
+
+        // Keranjang Belanja
+        let cart = [];
+
+        // Format Rupiah
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        }
+
+        // Render Daftar Produk
+        function renderProducts() {
+            const container = document.getElementById('productList');
+            container.innerHTML = products.map(product => `
+                <div class="bg-white rounded-2xl overflow-hidden card-shadow group hover:shadow-lg transition-shadow">
+                    <img src="${product.img}" alt="${product.name}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-5">
+                        <h3 class="font-bold text-xl mb-1">${product.name}</h3>
+                        <p class="text-gray-500 text-sm mb-3">${product.desc}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold text-lg">${formatRupiah(product.price)}</span>
+                            <button class="add-to-cart bg-primary/10 text-primary hover:bg-primary hover:text-white px-3 py-2 rounded-lg transition-colors" data-id="${product.id}">
+                                <i class="fa fa-plus mr-1"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Event Listener Tombol Tambah
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.currentTarget.dataset.id);
+                    addToCart(id);
+                });
+            });
+        }
+
+        // Tambah ke Keranjang
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            updateCartUI();
+            showToast();
+        }
+
+        // Hapus / Kurangi Item
+        function changeQuantity(productId, delta) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+            
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            updateCartUI();
+        }
+
+        // Update Tampilan Keranjang
+        function updateCartUI() {
+            const cartCount = document.getElementById('cartCount');
+            const emptyCart = document.getElementById('emptyCart');
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const totalPrice = document.getElementById('totalPrice');
+
+            // Jumlah item
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+
+            // Tampilan
+            if (cart.length === 0) {
+                emptyCart.classList.remove('hidden');
+                cartItems.classList.add('hidden');
+                cartTotal.classList.add('hidden');
+            } else {
+                emptyCart.classList.add('hidden');
+                cartItems.classList.remove('hidden');
+                cartTotal.classList.remove('hidden');
+
+                // Render Item
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="flex items-center justify-between bg-white p-3 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.img}" alt="${item.name}" class="w-12 h-12 object-cover rounded-lg">
+                            <div>
+                                <h4 class="font-semibold">${item.name}</h4>
+                                <p class="text-sm text-gray-500">${formatRupiah(item.price)}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeQuantity(${item.id}, -1)" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="changeQuantity(${item.id}, 1)" class="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full hover:bg-primary/20">+</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Total Harga
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalPrice.textContent = formatRupiah(total);
+            }
+        }
+
+        // Notifikasi
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        // Checkout
+        document.getElementById('checkoutBtn').addEventListener('click', () => {
+            if (cart.length === 0) return alert('Keranjang masih kosong!');
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            alert(`✅ Terima kasih!\nTotal pesanan: ${formatRupiah(total)}\nPesanan akan segera diproses! 🚀`);
+            cart = [];
+            updateCartUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+        });
+    </script>
+</body>
+</html>
